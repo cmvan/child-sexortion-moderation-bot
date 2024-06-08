@@ -38,7 +38,8 @@ class ModeratorReport:
     ]
     FALSE_REPORT_DECISION_OPTIONS = [
         "Warn user about not submitting false reports",
-        "Increase the number of times user has submitted false reports"
+        "Increase the number of times user has submitted false reports",
+        "Automated report"
     ]
     REPORT_FREQUENCY_DECISION_OPTIONS = [
         "Report to law enforcement, NCMEC, and Lantern",
@@ -106,6 +107,11 @@ class ModeratorReport:
                 self.state = ModeratorState.ACTION_COMPLETE
                 supabase.increment_num_false_reports_submitted(self.current_report['reported_by'])
                 reply = "We increased the number of false reports associated to this user. We are closing the report."
+                replies += [reply]
+            
+            if i == 2:
+                self.state = ModeratorState.ACTION_COMPLETE
+                reply = "False report issued by bot. No further action needed. We are closing the report."
                 replies += [reply]
         
         if self.state == ModeratorState.AWAITING_LEGIT_REPORT_DECISION:
@@ -187,10 +193,6 @@ class ModeratorReport:
                 if channel:
                     # Notify that the user can no longer send new messages
                     await channel.send(f"User <@{reported_user}> has been banned for the following message and can no longer send any messages:\n```{reported_message}```Message Link: {message_link}\n\n" )
-
-                    # Notify banned user in private
-                    user_warning_msg = f"You have been banned for the following message and can no longer send any messages:\n```{reported_message}```Message Link: {message_link}\n\n"
-                    await message.author.send(user_warning_msg)
                     
                     await message.channel.send(f"User <@{reported_user}> has been successfully banned. The reporting user has been notified.")
                 else:
